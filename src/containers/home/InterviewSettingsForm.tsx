@@ -1,6 +1,7 @@
 import { Button, Flex, Box } from "@chakra-ui/react";
 import React from "react";
 import { useFormik } from "formik";
+import * as Yup from "yup";
 
 import FormSelect from "../../components/formComponents/FormSelect";
 import { IInterViewSettings } from "../../interface/forms";
@@ -9,8 +10,13 @@ import {
   interviewLanguageOptions,
   interviewModeOptions,
 } from "./constants";
+import { useData } from "./DataProvider";
+import { useTabDispatch } from "./TabProvider";
 
 const InterviewDetailsForm: React.FC = () => {
+  const data = useData();
+  const tabDispatch = useTabDispatch();
+
   const {
     errors,
     touched,
@@ -20,12 +26,31 @@ const InterviewDetailsForm: React.FC = () => {
     setFieldValue,
   } = useFormik<IInterViewSettings>({
     initialValues: {
-      interviewMode: "",
-      interviewDuration: "",
-      interviewLanguage: "",
+      interviewMode: data?.state.interviewSettings.interviewMode || "",
+      interviewDuration: data?.state.interviewSettings.interviewDuration || "",
+      interviewLanguage: data?.state.interviewSettings.interviewLanguage || "",
     },
+    validationSchema: Yup.object().shape({
+      interviewMode: Yup.string().required("Interview Mode is required"),
+      interviewDuration: Yup.string().required(
+        "Interview Duration is required"
+      ),
+      interviewLanguage: Yup.string().required(
+        "Interview Language is required"
+      ),
+    }),
     onSubmit: (values) => {
-      console.log({ values });
+      const jobDetails = data!.state.jobDetails;
+      const requisitionDetails = data!.state.requisitionDetails;
+      data?.setState({
+        jobDetails,
+        requisitionDetails,
+        interviewSettings: {
+          interviewMode: values.interviewMode,
+          interviewDuration: values.interviewDuration,
+          interviewLanguage: values.interviewLanguage,
+        },
+      });
       alert("Form successfully submitted");
     },
   });
@@ -56,7 +81,7 @@ const InterviewDetailsForm: React.FC = () => {
           touched={touched?.interviewDuration}
         />
         <FormSelect
-          label="Job Location"
+          label="Interview Language"
           name="interviewLanguage"
           placeholder="Select interview language"
           options={interviewLanguageOptions}
@@ -67,7 +92,11 @@ const InterviewDetailsForm: React.FC = () => {
           value={values.interviewLanguage}
         />
         <Flex w="100%" justify="flex-end" mt="4rem" gap="20px">
-          <Button colorScheme="gray" type="button">
+          <Button
+            colorScheme="gray"
+            type="button"
+            onClick={() => tabDispatch!({ type: "previous" })}
+          >
             Previous
           </Button>
           <Button colorScheme="red" type="submit">
