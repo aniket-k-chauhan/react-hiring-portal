@@ -5,24 +5,38 @@ import * as Yup from "yup";
 
 import FormInput from "../../components/formComponents/FormInput";
 import { IJobDetails } from "../../interface/forms";
+import { useData } from "./DataProvider";
+import { useTabDispatch } from "./TabProvider";
 
 const JobDetailsForm: React.FC = () => {
+  const data = useData();
+  const tabDispatch = useTabDispatch();
+
   const { handleChange, errors, touched, handleBlur, handleSubmit, values } =
     useFormik<IJobDetails>({
       initialValues: {
-        jobTitle: "",
-        jobDetails: "",
-        jobLocation: "",
+        jobTitle: data?.state.jobDetails.jobTitle || "",
+        jobDetails: data?.state.jobDetails.jobDetails || "",
+        jobLocation: data?.state.jobDetails.jobLocation || "",
       },
       validationSchema: Yup.object().shape({
         jobTitle: Yup.string().required("Job Title is required"),
         jobDetails: Yup.string().required("Job Details is required"),
         jobLocation: Yup.string().required("Job Location is required"),
-        jobPosition: Yup.string().required("Job position is required"),
       }),
       onSubmit: (values) => {
-        console.log({ values });
-        // Go to next step
+        const requisitionDetails = data!.state.requisitionDetails;
+        const interviewSettings = data!.state.interviewSettings;
+        data?.setState({
+          requisitionDetails,
+          interviewSettings,
+          jobDetails: {
+            jobDetails: values.jobDetails,
+            jobLocation: values.jobLocation,
+            jobTitle: values.jobTitle,
+          },
+        });
+        tabDispatch!({ type: "next" });
       },
     });
 
@@ -55,12 +69,16 @@ const JobDetailsForm: React.FC = () => {
           placeholder="Enter job location"
           onChange={handleChange}
           onBlur={handleBlur}
-          error={errors.jobLocation}
-          touched={touched.jobLocation}
-          value={values.jobLocation}
+          error={errors?.jobLocation}
+          touched={touched?.jobLocation}
+          value={values?.jobLocation}
         />
         <Flex w="100%" justify="flex-end" mt="4rem" gap="20px">
-          <Button colorScheme="gray" type="button">
+          <Button
+            colorScheme="gray"
+            type="button"
+            onClick={() => tabDispatch!({ type: "previous" })}
+          >
             Previous
           </Button>
           <Button colorScheme="red" type="submit">
