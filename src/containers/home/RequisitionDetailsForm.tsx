@@ -7,8 +7,13 @@ import FormInput from "../../components/formComponents/FormInput";
 import FormSelect from "../../components/formComponents/FormSelect";
 import { IRequisitionDetails } from "../../interface/forms";
 import { genderOptions, urgencyOptions } from "./constants";
+import { useData } from "./DataProvider";
+import { useTabDispatch } from "./TabProvider";
 
 const RequisitionDetailsForm: React.FC = () => {
+  const data = useData();
+  const tabDispatch = useTabDispatch();
+
   const {
     handleChange,
     errors,
@@ -20,10 +25,10 @@ const RequisitionDetailsForm: React.FC = () => {
     setFieldValue,
   } = useFormik<IRequisitionDetails>({
     initialValues: {
-      requisitionTitle: "",
-      noOfOpenings: 0,
-      urgency: "",
-      gender: "",
+      requisitionTitle: data?.state.requisitionDetails.requisitionTitle || "",
+      noOfOpenings: data?.state.requisitionDetails.noOfOpenings || 0,
+      urgency: data?.state.requisitionDetails.urgency || "",
+      gender: data?.state.requisitionDetails.gender || "",
     },
     validationSchema: Yup.object().shape({
       requisitionTitle: Yup.string().required("Requisition title is required"),
@@ -31,12 +36,24 @@ const RequisitionDetailsForm: React.FC = () => {
         .typeError("Enter a valid number")
         .required("Number of openings is required")
         .positive("Enter a valid number")
-        .min(1, "Enter a valid number"),
+        .min(0, "Enter a valid number"), // min set to zero
       urgency: Yup.string().required("Urgency is required"),
       gender: Yup.string().required("Gender is required"),
     }),
     onSubmit: (values) => {
-      //  Go to Next Step
+      const jobDetails = data!.state.jobDetails;
+      const interviewSettings = data!.state.interviewSettings;
+      data?.setState({
+        jobDetails,
+        interviewSettings,
+        requisitionDetails: {
+          requisitionTitle: values.requisitionTitle,
+          noOfOpenings: values.noOfOpenings,
+          urgency: values.urgency,
+          gender: values.gender,
+        },
+      });
+      tabDispatch!({ type: "next" });
     },
   });
 
