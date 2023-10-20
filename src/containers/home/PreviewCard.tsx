@@ -1,5 +1,13 @@
 import { Box, Flex, Text, Grid } from "@chakra-ui/react";
 import React from "react";
+import { useData } from "./DataProvider";
+import {
+  genderOptions,
+  interviewDurationOptions,
+  interviewLanguageOptions,
+  interviewModeOptions,
+  urgencyOptions,
+} from "./constants";
 
 const DataCard: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
@@ -34,6 +42,7 @@ const KeyValue: React.FC<{
 };
 
 const PreviewCard: React.FC = () => {
+  const data = useData();
   return (
     <Box p="1rem">
       <Box borderRadius="10px" bgColor="gray.100" height="fit-content">
@@ -63,30 +72,85 @@ const PreviewCard: React.FC = () => {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Text fontSize="0.9rem" fontWeight="500"></Text>
+              <Text fontSize="0.9rem" fontWeight="500">
+                {data?.state.requisitionDetails.requisitionTitle}
+              </Text>
               <Flex justifyContent="space-around" alignItems="center">
                 <Text fontSize="0.8rem" mr="0.4rem" fontWeight="200" as="p">
                   OPENINGS
                 </Text>
-                <Text fontSize="1rem" fontWeight="bold" as="span"></Text>
+                <Text fontSize="1rem" fontWeight="bold" as="span">
+                  {data?.state.requisitionDetails.noOfOpenings}
+                </Text>
               </Flex>
             </Flex>
           </Box>
         </Box>
         <Box maxH="50rem" overflowY="auto" px="24px" pb="24px">
           <DataCard title="Requisition Details">
-            <KeyValue title="Urgency" value="" />
-            <KeyValue title="Gender" value="" />
+            <KeyValue
+              title="Urgency"
+              value={
+                urgencyOptions.find(
+                  (item: { value: string }) =>
+                    item?.value === data!.state.requisitionDetails.urgency
+                )?.label
+              }
+            />
+            <KeyValue
+              title="Gender"
+              value={
+                genderOptions.find(
+                  (item: { value: string }) =>
+                    item?.value === data!.state.requisitionDetails.gender
+                )?.label
+              }
+            />
           </DataCard>
           <DataCard title="Job Detail">
-            <KeyValue title="Job Title" value="" />
-            <KeyValue title="Job Details" value="" />
-            <KeyValue title="Job Location" value="" />
+            <KeyValue
+              title="Job Title"
+              value={data?.state.jobDetails.jobTitle}
+            />
+            <KeyValue
+              title="Job Details"
+              value={data?.state.jobDetails.jobDetails}
+            />
+            <KeyValue
+              title="Job Location"
+              value={data?.state.jobDetails.jobLocation}
+            />
           </DataCard>
           <DataCard title="Interview Settings">
-            <KeyValue title="Interview Duration" value="" />
-            <KeyValue title="Interview Language" value="" />
-            <KeyValue title="Interview Mode" value="" />
+            <KeyValue
+              title="Interview Duration"
+              value={
+                interviewDurationOptions.find(
+                  (item: { value: string }) =>
+                    item?.value ===
+                    data!.state.interviewSettings.interviewDuration
+                )?.label
+              }
+            />
+            <KeyValue
+              title="Interview Language"
+              value={
+                interviewLanguageOptions.find(
+                  (item: { value: string }) =>
+                    item?.value ===
+                    data!.state.interviewSettings.interviewLanguage
+                )?.label
+              }
+            />
+            <KeyValue
+              title="Interview Mode"
+              value={
+                interviewModeOptions.find(
+                  (item: { value: string }) =>
+                    item?.value === data!.state.interviewSettings.interviewMode
+                )?.label
+              }
+            />
           </DataCard>
         </Box>
       </Box>
